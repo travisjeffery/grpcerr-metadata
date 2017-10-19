@@ -32,8 +32,8 @@ const (
 	statusCodeKey = "grpcerr_status_code"
 )
 
-// ClientErrMiddleware is used on the client-requests.
-func ClientErrMiddleware(errType interface{}) endpoint.Middleware {
+// ClientMiddleware is used on the client-requests.
+func ClientMiddleware(errType interface{}) endpoint.Middleware {
 	et := reflect.TypeOf(errType)
 	return func(next endpoint.Endpoint) endpoint.Endpoint {
 		return func(ctx context.Context, request interface{}) (response interface{}, err error) {
@@ -58,8 +58,8 @@ func ClientErrMiddleware(errType interface{}) endpoint.Middleware {
 	}
 }
 
-// ServerErrMiddleware is used on the server-responses.
-func ServerErrMiddleware(errType interface{}) endpoint.Middleware {
+// ServerMiddleware is used on the server-responses.
+func ServerMiddleware(errType interface{}) endpoint.Middleware {
 	return func(next endpoint.Endpoint) endpoint.Endpoint {
 		return func(ctx context.Context, request interface{}) (response interface{}, err error) {
 			response, err = next(ctx, request)
