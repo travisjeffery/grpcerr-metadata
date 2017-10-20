@@ -2,7 +2,6 @@ package grpcerr
 
 import (
 	"context"
-	"reflect"
 	"strconv"
 
 	"github.com/go-kit/kit/endpoint"
@@ -33,8 +32,7 @@ const (
 )
 
 // ClientMiddleware is used on the client-requests.
-func ClientMiddleware(errType interface{}) endpoint.Middleware {
-	et := reflect.TypeOf(errType)
+func ClientMiddleware() endpoint.Middleware {
 	return func(next endpoint.Endpoint) endpoint.Endpoint {
 		return func(ctx context.Context, request interface{}) (response interface{}, err error) {
 			response, err = next(ctx, request)
@@ -50,16 +48,13 @@ func ClientMiddleware(errType interface{}) endpoint.Middleware {
 			if err != nil {
 				return response, err
 			}
-			if _, ok := reflect.New(et).Interface().(statusCoder); ok {
-				return response, wrap(err, statusCode)
-			}
-			return response, err
+			return response, wrap(err, statusCode)
 		}
 	}
 }
 
 // ServerMiddleware is used on the server-responses.
-func ServerMiddleware(errType interface{}) endpoint.Middleware {
+func ServerMiddleware() endpoint.Middleware {
 	return func(next endpoint.Endpoint) endpoint.Endpoint {
 		return func(ctx context.Context, request interface{}) (response interface{}, err error) {
 			response, err = next(ctx, request)
