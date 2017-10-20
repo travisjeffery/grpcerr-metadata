@@ -61,6 +61,16 @@ func ServerMiddleware() endpoint.Middleware {
 			if err != nil {
 				return response, nil
 			}
+			type causer interface {
+				Cause() error
+			}
+			for err != nil {
+				cause, ok := err.(causer)
+				if !ok {
+					break
+				}
+				err = cause.Cause()
+			}
 			if errsc, ok := err.(statusCoder); ok {
 				header := metadata.Pairs(statusCodeKey, strconv.Itoa(errsc.StatusCode()))
 				grpc.SendHeader(ctx, header)
