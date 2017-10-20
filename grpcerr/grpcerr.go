@@ -58,6 +58,9 @@ func ServerMiddleware() endpoint.Middleware {
 	return func(next endpoint.Endpoint) endpoint.Endpoint {
 		return func(ctx context.Context, request interface{}) (response interface{}, err error) {
 			response, err = next(ctx, request)
+			if err != nil {
+				return response, nil
+			}
 			if errsc, ok := err.(statusCoder); ok {
 				header := metadata.Pairs(statusCodeKey, strconv.Itoa(errsc.StatusCode()))
 				grpc.SendHeader(ctx, header)
