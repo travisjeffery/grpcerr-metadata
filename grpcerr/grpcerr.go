@@ -58,7 +58,7 @@ func ServerMiddleware() endpoint.Middleware {
 	return func(next endpoint.Endpoint) endpoint.Endpoint {
 		return func(ctx context.Context, request interface{}) (response interface{}, err error) {
 			response, err = next(ctx, request)
-			if err != nil {
+			if err == nil {
 				return response, nil
 			}
 			type causer interface {
