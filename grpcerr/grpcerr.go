@@ -9,26 +9,26 @@ import (
 	"google.golang.org/grpc/metadata"
 )
 
-type statusCoder interface {
-	StatusCode() int
+type coder interface {
+	Code() int
 }
 
-type withStatusCode struct {
+type withCode struct {
 	error
-	statusCode int
+	code int
 }
 
-func (w *withStatusCode) StatusCode() int { return w.statusCode }
+func (w *withCode) Code() int { return w.code }
 
-func wrap(err error, statusCode int) error {
+func wrap(err error, code int) error {
 	if err == nil {
 		return nil
 	}
-	return &withStatusCode{error: err, statusCode: statusCode}
+	return &withCode{error: err, code: code}
 }
 
 const (
-	statusCodeKey = "grpcerr_status_code"
+	codeKey = "grpcerr_code"
 )
 
 // ClientMiddleware is used on the client-requests.
@@ -40,15 +40,15 @@ func ClientMiddleware() endpoint.Middleware {
 			if !ok {
 				return response, err
 			}
-			statusCodeVal, ok := md[statusCodeKey]
+			codeVal, ok := md[codeKey]
 			if !ok {
 				return response, err
 			}
-			statusCode, err := strconv.Atoi(statusCodeVal[0])
+			code, err := strconv.Atoi(codeVal[0])
 			if err != nil {
 				return response, err
 			}
-			return response, wrap(err, statusCode)
+			return response, wrap(err, code)
 		}
 	}
 }
@@ -71,8 +71,8 @@ func ServerMiddleware() endpoint.Middleware {
 				}
 				err = cause.Cause()
 			}
-			if errsc, ok := err.(statusCoder); ok {
-				header := metadata.Pairs(statusCodeKey, strconv.Itoa(errsc.StatusCode()))
+			if errsc, ok := err.(coder); ok {
+				header := metadata.Pairs(codeKey, strconv.Itoa(errsc.Code()))
 				grpc.SendHeader(ctx, header)
 			}
 			return response, err

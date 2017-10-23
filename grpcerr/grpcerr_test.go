@@ -46,7 +46,7 @@ func TestMiddleware(t *testing.T) {
 		if r.v != "the response" {
 			t.Errorf("got %s; want %s", r.v, "the response")
 		}
-		esc, ok := err.(statusCoder)
+		esc, ok := err.(coder)
 		if !ok {
 			t.Error("expected statusCoder")
 		}
